@@ -1,10 +1,10 @@
 const express = require('express');
-
+const path = require('path');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const app = express();
-
-app.use(bodyParser.json());
+const ejs = require('ejs');
+app.use(express.json());
 const con = mysql.createConnection({
     host: 'localhost',
     user:"root",
@@ -13,6 +13,11 @@ const con = mysql.createConnection({
     multipleStatements: true
 })
 
+app.set('view engine', 'ejs');
+
+app.set('views',path.join(__dirname, 'views'));
+app.use(express.urlencoded({extended: false}));
+
 con.connect((err)=>{
     if(err) console.log("failed connecting");
     else console.log("Connected Successfulluy");
@@ -20,51 +25,63 @@ con.connect((err)=>{
 
 app.listen(5300, ()=>console.log("Listening to port 5300"));
 
-app.get("/users", (req,res)=>{
-    con.query("select * from first_table", (err,rows,fields)=>{
-        if(!err) res.send(rows);
-        else console.log(err);
+app.get('/',(req, res) => {
+    let sql = "SELECT * FROM first_table";
+    let query = con.query(sql, (err, rows) => {
+        if(err) throw err;
+        res.render('index', {
+            title : 'Displaying Data items:',
+            users : rows
+        });
     });
 });
 
-app.get("/users/:id", (req,res)=>{
-    con.query("select * from first_table where id = ?", [req.params.id] ,(err,rows,fields)=>{
-        if(!err) res.send(rows);
-        else console.log(err);
+
+app.get('/add',(req, res) => {
+    res.render('newUser', {
+        title : 'Create New Entry',
     });
 });
 
-app.delete("/users/:id", (req,res)=>{
-    con.query("delete from first_table where id = ?", [req.params.id] ,(err,rows,fields)=>{
-        if(!err) res.send(`deleted user with ${req.params.id}`);
-        else console.log(err);
+app.post('/save',(req, res) => { 
+    let data = {name: req.body.name, age: req.body.age};
+    let sql = "INSERT INTO first_table SET ?";
+    let query = con.query(sql, data,(err, results) => {
+      if(err) throw err;
+      res.redirect('/');
     });
 });
 
-app.post('/users', (req, res) => {
-    let usr = req.body;
-    var sql = "SET @id = ?;SET @name = ?;SET @age = ?; \
-    CALL userAddOrEdit (@id,@name,@age);";
-    con.query(sql, [usr.id, usr.name, usr.age], (err, rows, fields) => {
-        if (!err)
-            rows.forEach(element => {
-                if(element.constructor == Array)
-                res.send('Inserted User id : '+element[0].id);
-            });
-        else
-            console.log(err);
+
+app.get('/edit/:userId',(req, res) => {
+    const userId = req.params.userId;
+    let sql = `Select * from first_table where id = ${userId}`;
+    let query = con.query(sql,(err, result) => {
+        if(err) throw err;
+        res.render('edit_data', {
+            title : 'Edit Data',
+            user : result[0]
+        });
     });
 });
 
-//Update an employees
-app.put('/users', (req, res) => {
-    let usr = req.body;
-    var sql = "SET @id = ?;SET @name = ?;SET @age = ?; \
-    CALL userAddOrEdit (@id,@name,@age);";
-    con.query(sql, [usr.id, usr.name, usr.age], (err, rows, fields) => {
-        if (!err)
-            res.send('Updated successfully');
-        else
-            console.log(err);
+
+app.post('/update',(req, res) => {
+    const userId = req.body.id;
+    let sql = "update first_table SET name='"+req.body.name+"',  age='"+req.body.age+"' where id = "+userId;
+    let query = con.query(sql,(err, results) => {
+      if(err) throw err;
+      res.redirect('/');
+    });
+});
+
+
+
+app.get('/delete/:userId',(req, res) => {
+    const userId = req.params.userId;
+    let sql = `DELETE from first_table where id = ${userId}`;
+    let query = con.query(sql,(err, result) => {
+        if(err) throw err;
+        res.redirect('/');
     });
 });

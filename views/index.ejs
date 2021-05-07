@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><%= title %></title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <!-- <link rel="stylesheet" href="style.css"> -->
+</head>
+<body>
+ 
+<div class="container mt-5 pt-4">
+  <h2 class="text-center mb-5"><%= title %></h2>
+  
+  <table class="table table-striped">
+    <thead>
+      <tr class="bg-primary" style="color: rgb(255, 255, 255);">
+        <th>ID.</th>
+        <th>NAME</th>
+        <th>AGE</th>
+        <th>Activity</th>
+      </tr>
+    </thead>
+    <tbody>
+        <% users.forEach(function(user){ %>
+            <tr>
+                <td><%= user.id %></td>
+                <td><%= user.name %></td>
+                <td><%= user.age %></td>
+                <td>
+                    <a href="edit/<%= user.id %>" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="delete/<%= user.id %>" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+  </table>
+  <div class="text-center">
+  <a href="/add" class="btn btn-md btn-primary mb-5">New User</a><br/><br/>
+</div>
+</div>
+ 
+</body>
+
+</html>
