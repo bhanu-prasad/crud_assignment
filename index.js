@@ -3,7 +3,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const app = express();
-const ejs = require('ejs');
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(express.json());
 const con = mysql.createConnection({
     host: 'localhost',
